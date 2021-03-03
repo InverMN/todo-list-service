@@ -1,24 +1,26 @@
 package service.models
 
 import org.jetbrains.exposed.dao.*
-
-//data class Task(var title: String, val id: String, var dueDate: ZonedDateTime, var priority: Int, var isDone: Boolean, var description: String)
+import org.joda.time.DateTime
 
 object Tasks : IntIdTable() {
     val title = varchar("title", 100)
-    val dueTime = datetime("dueTime")
     val priority = integer("priority")
     val isDone = bool("isDone")
     val description = varchar("description", 256)
-    val list = reference("list", Lists)
+    val list = reference("list", Lists).default(EntityID(1, Lists))
 }
 
-class Task(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Task>(Tasks)
+class TaskEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<TaskEntity>(Tasks)
 
     var title by Tasks.title
-    var dueTime by Tasks.dueTime
     var priority by Tasks.priority
     var isDone by Tasks.isDone
     var description by Tasks.description
+    var list by Tasks.list
+
+    fun toTask() = Task(id.value, title, priority, isDone, description, list.value)
 }
+
+data class Task(val id: Int, val title: String, val priority: Int, val isDone: Boolean, val description: String, val list: Int)
